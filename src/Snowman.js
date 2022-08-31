@@ -9,6 +9,8 @@ import img4 from "./4.png";
 import img5 from "./5.png";
 import img6 from "./6.png";
 
+import { randomWord, ENGLISH_WORDS } from "./words"
+import AlphaButtons from "./AlphaButtons"
 
 /** Snowman game: plays hangman-style game with a melting snowman.
  *
@@ -25,14 +27,14 @@ import img6 from "./6.png";
 
 function Snowman({
       images=[img0, img1, img2, img3, img4, img5, img6],
-      words=["apple"],
+      words= ENGLISH_WORDS,
       maxWrong=6,
     }) {
   /** by default, allow 6 guesses and use provided gallows images. */
 
   const [nWrong, setNWrong] = useState(0);
   const [guessedLetters, setGuessedLetters] = useState(() => new Set());
-  const [answer, setAnswer] = useState((words)[0]);
+  const [answer, setAnswer] = useState(randomWord(words));
 
   /** guessedWord: show current-state of word:
    if guessed letters are {a,p,e}, show "app_e" for "apple"
@@ -58,26 +60,40 @@ function Snowman({
 
     setNWrong(n => n + (answer.includes(ltr) ? 0 : 1));
   }
+  
+  function restart() {
+    setNWrong(0);
+    setGuessedLetters(() => new Set());
+    setAnswer(randomWord(words));
+  }
 
   /** generateButtons: return array of letter buttons to render */
-  function generateButtons() {
-    return "abcdefghijklmnopqrstuvwxyz".split("").map(ltr => (
-        <button
-            key={ltr}
-            value={ltr}
-            onClick={handleGuess}
-            disabled={guessedLetters.has(ltr)}
-        >
-          {ltr}
-        </button>
-    ));
-  }
+  // function generateButtons() {
+  //   return "abcdefghijklmnopqrstuvwxyz".split("").map(ltr => (
+  //       <button id={ltr}
+  //           key={ltr}
+  //           value={ltr}
+  //           onClick={handleGuess}
+  //           disabled={guessedLetters.has(ltr)}
+  //       >
+  //         {ltr}
+  //       </button>
+  //   ));
+  // }
+  
+  const lettersString = "abcdefghijklmnopqrstuvwxyz"
 
   return (
       <div className="Snowman">
         <img src={(images)[nWrong]} alt={nWrong} />
+        <div>Number of wrong guesses: {nWrong}</div>
         <p className="Snowman-word">{guessedWord()}</p>
-        <p>{generateButtons()}</p>
+        {/* {nWrong !== maxWrong && <p className="Buttons">{generateButtons()}</p>} */}
+        <div onClick={handleGuess}>
+          <AlphaButtons letters={lettersString} disabled={guessedLetters.has(ltr)}/>
+        </div>
+        {nWrong === maxWrong && <p className="end-game">You lose: the word was {answer}</p>}
+        <button onClick={restart}>Restart game</button>
       </div>
   );
 }
